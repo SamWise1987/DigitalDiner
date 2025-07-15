@@ -1,5 +1,7 @@
 import { useParams, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Utensils, BookOpen, CreditCard } from "lucide-react";
@@ -21,6 +23,13 @@ export default function QRLanding() {
       return response.json();
     },
   });
+
+  // Prefetch menu items so the menu page loads immediately
+  useEffect(() => {
+    if (sessionData) {
+      queryClient.prefetchQuery({ queryKey: ["/api/menu"] });
+    }
+  }, [sessionData]);
 
   if (isLoading) {
     return (
