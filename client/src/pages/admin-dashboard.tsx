@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import TableStatusCard from "@/components/table-status-card";
 import { Utensils, Clock, PoundSterling, TrendingUp, Bell, QrCode, Plus, Eye } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
@@ -251,13 +252,24 @@ export default function AdminDashboard() {
                           <QrCode className="w-3 h-3 mr-1" />
                           QR Code
                         </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="text-xs"
-                        >
-                          <Eye className="w-3 h-3" />
-                        </Button>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-xs"
+                              onClick={() => {
+                                const url = `/qr/${table.qrCode}`;
+                                window.open(url, '_blank');
+                              }}
+                            >
+                              <Eye className="w-3 h-3" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Prova esperienza cliente</p>
+                          </TooltipContent>
+                        </Tooltip>
                       </div>
                     </div>
                   ))}

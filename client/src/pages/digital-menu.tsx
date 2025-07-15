@@ -49,7 +49,7 @@ export default function DigitalMenu() {
   };
 
   const handleGoBack = () => {
-    navigate(`/table/${session?.table?.qrCode || ''}`);
+    navigate(`/qr/${session?.table?.qrCode || ''}`);
   };
 
   const handleViewCart = () => {
