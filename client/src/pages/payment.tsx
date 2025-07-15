@@ -46,7 +46,7 @@ export default function Payment() {
   }, [orderId]);
 
   const handleGoBack = () => {
-    navigate(`/cart/${sessionId}`);
+    navigate(`/cart/${orderId}`);
   };
 
   const orderData = {
@@ -141,7 +141,7 @@ export default function Payment() {
               
               {paymentMethod === "card" && (
                 <Elements stripe={stripePromise} options={{ clientSecret }}>
-                  <PaymentForm orderId={orderId} sessionId={sessionId} />
+                  <PaymentForm orderId={orderId} />
                 </Elements>
               )}
             </CardContent>
