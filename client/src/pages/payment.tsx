@@ -15,31 +15,35 @@ if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
 export default function Payment() {
-  const { sessionId } = useParams();
+  const { orderId } = useParams();
   const [, navigate] = useLocation();
   const [clientSecret, setClientSecret] = useState("");
-  const [orderId, setOrderId] = useState<number | null>(null);
+  const [orderAmount, setOrderAmount] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState("apple-pay");
 
   useEffect(() => {
-    // Get order data from navigation state
-    const state = history.state?.state;
-    if (state?.orderId) {
-      setOrderId(state.orderId);
-      
-      // Create payment intent
-      fetch("/api/create-payment-intent", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          amount: 59.49, // This should come from order data
-          orderId: state.orderId 
-        }),
-      })
+    if (orderId) {
+      // Get order details first
+      fetch(`/api/orders/${orderId}`)
         .then(res => res.json())
-        .then(data => setClientSecret(data.clientSecret));
+        .then(order => {
+          setOrderAmount(parseFloat(order.total));
+          
+          // Create payment intent
+          return fetch("/api/create-payment-intent", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ 
+              amount: parseFloat(order.total),
+              orderId: parseInt(orderId)
+            }),
+          });
+        })
+        .then(res => res.json())
+        .then(data => setClientSecret(data.clientSecret))
+        .catch(err => console.error("Payment setup error:", err));
     }
-  }, []);
+  }, [orderId]);
 
   const handleGoBack = () => {
     navigate(`/cart/${sessionId}`);

@@ -56,6 +56,25 @@ export default function AdminDashboard() {
     createTableMutation.mutate(parseInt(tableNumber));
   };
 
+  const updateOrderStatus = async (orderId: number, status: string) => {
+    try {
+      const response = await apiRequest("PUT", `/api/orders/${orderId}/status`, { status });
+      if (response.ok) {
+        queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+        toast({
+          title: "Stato aggiornato",
+          description: `Ordine #${orderId} aggiornato a ${status}`,
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Errore",
+        description: "Errore nell'aggiornamento dello stato",
+        variant: "destructive",
+      });
+    }
+  };
+
   const stats = {
     activeTables: tables.filter((t: any) => t.status === "occupied").length,
     pendingOrders: orders.filter((o: any) => o.status === "pending" || o.status === "preparing").length,
@@ -293,7 +312,7 @@ export default function AdminDashboard() {
           <Card className="apple-shadow">
             <CardHeader className="pb-4">
               <div className="flex items-center justify-between">
-                <CardTitle>Live Orders</CardTitle>
+                <CardTitle>Ordini Live</CardTitle>
                 <div className="flex items-center space-x-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                   <span className="text-sm text-gray-500">Real-time</span>
@@ -301,35 +320,46 @@ export default function AdminDashboard() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4 max-h-96 overflow-y-auto">
-                {liveOrders.map((order: any) => (
-                  <div key={order.id} className="border border-gray-100 rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center space-x-2">
-                        <Badge variant="secondary">Table {order.tableId}</Badge>
-                        <span className="text-sm font-medium">#{order.id}</span>
+              {orders.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  Nessun ordine attivo
+                </div>
+              ) : (
+                <div className="space-y-4 max-h-96 overflow-y-auto">
+                  {orders.map((order: any) => (
+                    <div key={order.id} className="border border-gray-100 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center space-x-2">
+                          <Badge variant="secondary">Tavolo {order.tableId}</Badge>
+                          <span className="text-sm font-medium">#{order.id}</span>
+                          {order.customerName && (
+                            <span className="text-sm text-gray-500">- {order.customerName}</span>
+                          )}
+                        </div>
+                        <span className="text-sm text-gray-500">
+                          {new Date(order.createdAt).toLocaleTimeString()}
+                        </span>
                       </div>
-                      <span className="text-sm text-gray-500">
-                        {new Date(order.createdAt).toLocaleTimeString()}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-lg font-semibold">£{order.total}</span>
-                      <div className="flex items-center space-x-2">
-                        <Badge 
-                          variant={order.status === "preparing" ? "default" : "secondary"}
-                          className={order.status === "preparing" ? "bg-yellow-100 text-yellow-800" : ""}
-                        >
-                          {order.status}
-                        </Badge>
-                        <Button variant="ghost" size="sm" className="text-primary">
-                          Update
-                        </Button>
+                      <div className="flex items-center justify-between">
+                        <span className="text-lg font-semibold">€{order.total}</span>
+                        <div className="flex items-center space-x-2">
+                          <select
+                            value={order.status}
+                            onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+                            className="text-sm border rounded px-2 py-1"
+                          >
+                            <option value="pending">In Attesa</option>
+                            <option value="preparing">In Preparazione</option>
+                            <option value="ready">Pronto</option>
+                            <option value="served">Servito</option>
+                            <option value="paid">Pagato</option>
+                          </select>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

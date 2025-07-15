@@ -4,6 +4,17 @@
 
 This is a full-stack restaurant ordering system that enables customers to scan QR codes at tables, browse a digital menu, place orders, and make payments through Stripe. The system includes an admin dashboard for restaurant management and real-time order tracking.
 
+## Recent Changes (15-07-2025)
+
+- **Fixed Menu API**: Corrected endpoint from `/api/menu-items` to `/api/menu` in customer app
+- **Added Sample Menu Data**: Populated database with Italian restaurant menu items
+- **Enhanced Payment Flow**: Fixed order ID routing and Stripe integration
+- **Improved Order Management**: Added live order status management in admin dashboard
+- **Persistent Cart**: Implemented localStorage for cart persistence across page reloads
+- **Customer Navigation**: Added home button in customer app to exit menu
+- **Split Payment Support**: Created dedicated split payment page for bill sharing
+- **Visual QR Codes**: Integrated QRCode library for generating downloadable QR images
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.

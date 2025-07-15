@@ -47,7 +47,7 @@ export default function CustomerApp() {
 
   // Get menu items
   const { data: menuItems = [], isLoading: menuLoading } = useQuery<MenuItem[]>({
-    queryKey: ["/api/menu-items"],
+    queryKey: ["/api/menu"],
   });
 
   // Load cart from localStorage on mount
@@ -109,16 +109,31 @@ export default function CustomerApp() {
         throw new Error("Session ID o carrello mancante");
       }
 
+      // Get session to find table
+      const sessionRes = await apiRequest("GET", `/api/sessions/${params.sessionId}`);
+      const sessionData = await sessionRes.json();
+
+      // Create order using new format
       const order = await apiRequest("POST", "/api/orders", {
+        tableId: sessionData.tableId,
         sessionId: params.sessionId,
-        items: cart.map(item => ({
-          menuItemId: item.menuItemId,
-          quantity: item.quantity,
-          unitPrice: item.price
-        }))
+        subtotal: totalPrice,
+        serviceCharge: totalPrice * 0.125,
+        total: totalPrice * 1.125
       });
 
-      return order.json();
+      const orderData = await order.json();
+
+      // Add order items
+      for (const item of cart) {
+        await apiRequest("POST", `/api/orders/${orderData.id}/items`, {
+          menuItemId: item.menuItemId,
+          quantity: item.quantity,
+          price: item.price
+        });
+      }
+
+      return orderData;
     },
     onSuccess: (order) => {
       cartStorage.clearCart();
@@ -169,11 +184,24 @@ export default function CustomerApp() {
       <div className="bg-white border-b sticky top-0 z-40">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-xl font-semibold">Menu Digitale</h1>
-              <p className="text-sm text-muted-foreground">
-                Tavolo {session.table.number}
-              </p>
+            <div className="flex items-center gap-3">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  if (confirm("Vuoi uscire dal menu? Il carrello verrà salvato.")) {
+                    setLocation("/");
+                  }
+                }}
+              >
+                <Utensils className="w-4 h-4" />
+              </Button>
+              <div>
+                <h1 className="text-xl font-semibold">Menu Digitale</h1>
+                <p className="text-sm text-muted-foreground">
+                  Tavolo {session.table.number}
+                </p>
+              </div>
             </div>
             <Button
               onClick={() => setShowCart(!showCart)}
