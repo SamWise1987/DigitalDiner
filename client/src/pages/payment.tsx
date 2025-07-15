@@ -19,6 +19,7 @@ export default function Payment() {
   const [, navigate] = useLocation();
   const [clientSecret, setClientSecret] = useState("");
   const [orderAmount, setOrderAmount] = useState(0);
+  const [sessionId, setSessionId] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState("apple-pay");
 
   useEffect(() => {
@@ -28,6 +29,7 @@ export default function Payment() {
         .then(res => res.json())
         .then(order => {
           setOrderAmount(parseFloat(order.total));
+          setSessionId(order.sessionId);
           
           // Create payment intent
           return fetch("/api/create-payment-intent", {
@@ -46,7 +48,11 @@ export default function Payment() {
   }, [orderId]);
 
   const handleGoBack = () => {
-    navigate(`/cart/${sessionId}`);
+    if (sessionId) {
+      navigate(`/cart/${sessionId}`);
+    } else {
+      navigate("/");
+    }
   };
 
   const orderData = {
@@ -141,7 +147,7 @@ export default function Payment() {
               
               {paymentMethod === "card" && (
                 <Elements stripe={stripePromise} options={{ clientSecret }}>
-                  <PaymentForm orderId={orderId} sessionId={sessionId} />
+                  <PaymentForm orderId={orderId ? parseInt(orderId) : null} sessionId={sessionId ?? ""} />
                 </Elements>
               )}
             </CardContent>
