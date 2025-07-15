@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import TableStatusCard from "@/components/table-status-card";
+import QRCodeDisplay from "@/components/qr-code-display";
 import { Utensils, Clock, PoundSterling, TrendingUp, Bell, QrCode, Plus, Eye } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -333,54 +334,18 @@ export default function AdminDashboard() {
           </Card>
         </div>
 
-        {/* QR Code Dialog */}
-        <Dialog open={qrDialogOpen} onOpenChange={setQrDialogOpen}>
-          <DialogContent className="apple-card max-w-md">
-            <DialogHeader>
-              <DialogTitle>QR Code - Tavolo {selectedTable?.number}</DialogTitle>
-            </DialogHeader>
-            {selectedTable && (
-              <div className="space-y-4">
-                <div className="bg-white p-6 rounded-xl border-2 border-border flex flex-col items-center">
-                  <div className="w-48 h-48 bg-gray-100 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300">
-                    <div className="text-center">
-                      <QrCode className="w-16 h-16 mx-auto mb-2 text-gray-400" />
-                      <p className="text-sm text-gray-500">QR Code per Tavolo {selectedTable.number}</p>
-                      <p className="text-xs text-gray-400 mt-1">Scansiona per ordinare</p>
-                    </div>
-                  </div>
-                  <div className="mt-4 text-center">
-                    <p className="text-sm font-medium">URL di accesso:</p>
-                    <p className="text-xs text-gray-500 break-all">
-                      {window.location.origin}/qr/{selectedTable.qrCode || `table-${selectedTable.number}`}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex space-x-2">
-                  <Button 
-                    className="flex-1 bg-primary hover:bg-primary/90"
-                    onClick={() => {
-                      const url = `${window.location.origin}/qr/${selectedTable.qrCode || `table-${selectedTable.number}`}`;
-                      navigator.clipboard.writeText(url);
-                      toast({
-                        title: "Link copiato",
-                        description: "Il link del tavolo è stato copiato negli appunti",
-                      });
-                    }}
-                  >
-                    Copia Link
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => setQrDialogOpen(false)}
-                  >
-                    Chiudi
-                  </Button>
-                </div>
-              </div>
-            )}
-          </DialogContent>
-        </Dialog>
+        {/* QR Code Display */}
+        {selectedTable && (
+          <QRCodeDisplay
+            qrCode={selectedTable.qrCode}
+            tableNumber={selectedTable.number}
+            isOpen={qrDialogOpen}
+            onClose={() => {
+              setQrDialogOpen(false);
+              setSelectedTable(null);
+            }}
+          />
+        )}
       </div>
     </div>
   );

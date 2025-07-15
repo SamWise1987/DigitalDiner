@@ -28,6 +28,7 @@ export const orders = pgTable("orders", {
   id: serial("id").primaryKey(),
   tableId: integer("table_id").references(() => tables.id).notNull(),
   sessionId: text("session_id").notNull(),
+  customerName: text("customer_name"),
   status: text("status").notNull().default("pending"), // pending, preparing, ready, served, paid
   subtotal: decimal("subtotal", { precision: 10, scale: 2 }).notNull(),
   serviceCharge: decimal("service_charge", { precision: 10, scale: 2 }).notNull(),
