@@ -6,10 +6,9 @@ import { useToast } from '@/hooks/use-toast';
 
 interface PaymentFormProps {
   orderId: number | null;
-  sessionId: string;
 }
 
-export default function PaymentForm({ orderId, sessionId }: PaymentFormProps) {
+export default function PaymentForm({ orderId }: PaymentFormProps) {
   const stripe = useStripe();
   const elements = useElements();
   const [, navigate] = useLocation();
