@@ -91,6 +91,16 @@ export default function AdminDashboard() {
               <h1 className="text-xl font-semibold text-foreground">RestaurantQR Admin</h1>
             </div>
             <div className="flex items-center space-x-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  window.open('/qr/GX_O_u9aOmcU', '_blank');
+                }}
+                className="text-sm"
+              >
+                Test Cliente
+              </Button>
               <div className="relative">
                 <Bell className="text-muted-foreground w-5 h-5" />
                 <span className="absolute -top-1 -right-1 w-2 h-2 bg-destructive rounded-full" />

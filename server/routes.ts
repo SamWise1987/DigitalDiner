@@ -113,7 +113,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/tables/:qrCode/session", async (req, res) => {
+  app.post("/api/tables/:qrCode/session", async (req, res) => {
     try {
       const { qrCode } = req.params;
       const table = await storage.getTableByQrCode(qrCode);
@@ -122,9 +122,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Table not found" });
       }
 
-      // Check if table is already occupied
-      if (table.status === "occupied") {
-        return res.status(409).json({ message: "Table is already occupied" });
+      // Check if table has an active session
+      if (table.status === "occupied" && table.sessionId) {
+        // Return existing session if table is occupied
+        const existingSession = await storage.getSession(table.sessionId);
+        if (existingSession) {
+          return res.json({ table, session: existingSession });
+        }
       }
 
       // Create new session and lock table
@@ -145,6 +149,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(table);
     } catch (error: any) {
       res.status(500).json({ message: "Error updating table status: " + error.message });
+    }
+  });
+
+  // Sessions
+  app.get("/api/sessions/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const session = await storage.getSession(id);
+      
+      if (!session) {
+        return res.status(404).json({ message: "Session not found" });
+      }
+
+      // Get table details
+      const table = await storage.getTable(session.tableId);
+      
+      res.json({ ...session, table });
+    } catch (error: any) {
+      res.status(500).json({ message: "Error fetching session: " + error.message });
     }
   });
 
